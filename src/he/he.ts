@@ -151,6 +151,20 @@ export function hex64(v: bigint): string {
   return '0x' + v.toString(16).padStart(16, '0');
 }
 
+/**
+ * Hex for an interval's EXCLUSIVE upper bound.
+ *
+ * The intervals are half-open, so the last message's upper bound is 2^64
+ * itself — one past the end of the seed space, and therefore NOT a 64-bit
+ * value. `hex64` rejects it, correctly: it is not a seed and must never be
+ * used as one. This is the one place that boundary is legitimately printed,
+ * and it prints at its true width rather than being silently wrapped to zero.
+ */
+export function hex64Exclusive(v: bigint): string {
+  if (v === SEED_SPACE) return '0x10000000000000000';
+  return hex64(v);
+}
+
 /** Hex for a byte string, as the page displays R. */
 export function hexBytes(b: Uint8Array): string {
   return Array.from(b, (x) => x.toString(16).padStart(2, '0')).join('');

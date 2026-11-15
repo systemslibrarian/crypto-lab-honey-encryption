@@ -9,6 +9,7 @@ import {
   hencWithSeed,
   henc,
   hex64,
+  hex64Exclusive,
   hexBytes,
   maulTopBit,
   parseHexBytes,
@@ -160,6 +161,17 @@ describe('honey encryption — the construction of Figure 4 (ePrint 2014/155, se
       expect(hex64(0n)).toBe('0x0000000000000000');
       expect(hex64(SEED_SPACE - 1n)).toBe('0xffffffffffffffff');
     });
+  });
+
+  it('prints the last interval\u2019s exclusive upper bound, which is 2^64 itself', () => {
+    // Half-open intervals mean the top message's upper bound is one PAST the
+    // seed space. hex64 refuses it, because it is not a seed; the display
+    // helper prints it at its true width rather than wrapping it to zero.
+    const top = interval(B - 1n, B);
+    expect(top.hi).toBe(SEED_SPACE);
+    expect(() => hex64(top.hi)).toThrow(/not a 64-bit value/);
+    expect(hex64Exclusive(top.hi)).toBe('0x10000000000000000');
+    expect(hex64Exclusive(top.lo)).toBe(hex64(top.lo));
   });
 
   it('decodes seed 0 and seed 2^64 - 1 to the extreme accounts', () => {

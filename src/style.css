@@ -1,0 +1,707 @@
+/*
+ * Honey Encryption — stylesheet.
+ *
+ * Dark is the only theme, pinned with a literal in index.html's head; there is
+ * no toggle and no prefers-color-scheme query. Every colour pair below was
+ * computed against WCAG 2.1 AA before being written, and the gate in e2e/
+ * recomputes them from the shipped build on every run.
+ *
+ * Two border tokens, deliberately:
+ *   --border          decorative rules and panel outlines (no contrast floor)
+ *   --border-control  the boundary of an interactive control, >= 3:1 on every
+ *                     surface it is painted on (WCAG 1.4.11)
+ * Collapsing them is how a lab ends up with 1.5:1 input outlines.
+ */
+
+:root {
+  color-scheme: dark;
+
+  --accent: #c8b560;
+  /* Text placed ON the accent fill. Near-white would be 1.8:1; this is 9.0:1. */
+  --accent-ink: #17130a;
+
+  --bg: #12100a;
+  --surface: #1b1811;
+  --surface-2: #252015;
+  --border: #413923;
+  --border-control: #8a7c52;
+
+  --text: #f3eee2;
+  --text-dim: #c9bea4;
+  --text-muted: #a89c82;
+
+  --ok: #8fcf7a;
+  --warn: #e8b84b;
+  --alarm: #ef8a7a;
+  --info: #8fc7e8;
+
+  --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --radius: 10px;
+}
+
+/* The longhand, not the `background` shorthand: axe and WebKit miss the
+   shorthand when deciding whether the root has a background at all. */
+html {
+  background-color: var(--bg);
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+/* Scoped to #app so they do not fight the always-dark .cl-topbar, which is
+   self-contained and ships its own type and colour. */
+#app {
+  max-width: 76rem;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 3vw, 2rem) 3rem;
+}
+
+#app p {
+  margin: 0 0 0.8rem;
+}
+
+#app h2 {
+  margin: 0 0 0.3rem;
+  font-size: clamp(1.1rem, 2.2vw, 1.35rem);
+  line-height: 1.25;
+}
+
+#app h3 {
+  margin: 1.4rem 0 0.5rem;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+}
+
+#app a {
+  color: var(--accent);
+  /* A persistent underline: colour alone is not a link affordance. */
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+#app a:hover {
+  color: var(--text);
+}
+
+#app code,
+#app kbd {
+  font-family: var(--mono);
+  font-size: 0.92em;
+}
+
+:is(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---------- hero (the §3.1 standard block) ---------- */
+
+.cl-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: clamp(1rem, 4vw, 3rem);
+  flex-wrap: wrap;
+  margin: clamp(1rem, 3vw, 2rem) 0 1.5rem;
+}
+.cl-hero-main {
+  flex: 1 1 22rem;
+  min-width: min(100%, 20rem);
+}
+.cl-hero-title {
+  margin: 0;
+  font-size: clamp(1.6rem, 3.8vw, 2.7rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+}
+.cl-hero-sub {
+  margin: 0.4rem 0 0;
+  font-size: clamp(0.9rem, 1.6vw, 1.05rem);
+  letter-spacing: 0.01em;
+  /* Lowered lightness rather than opacity: axe cannot resolve an opacity
+     stack, and a muted token keeps the computed ratio honest. */
+  color: var(--text-dim);
+}
+.cl-hero-desc {
+  margin: 0.55rem 0 0;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--text-dim);
+  max-width: 60ch;
+}
+.cl-hero-why {
+  flex: 0 1 min(40%, 26rem);
+  min-width: min(100%, 15rem);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.85rem 1.05rem;
+  background-color: #1d1a10;
+  /* Without this, the `width: 100%` the mobile query sets resolves to 100% of
+     the container PLUS this padding and border — 383.6px inside a 348px
+     container, i.e. a horizontal scrollbar at phone width. */
+  box-sizing: border-box;
+}
+.cl-hero-why-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--accent);
+}
+.cl-hero-why-text {
+  margin: 0.35rem 0 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+@media (max-width: 640px) {
+  .cl-hero {
+    flex-direction: column;
+    /* `flex-wrap: wrap` has to go with the direction change, and the template's
+       own snippet does not say so. A WRAPPING COLUMN container sizes its items
+       on the cross axis against an indefinite available space, which falls back
+       to their max-content width — so both children render at their unwrapped
+       text width (measured here: 383.6px inside a 348px container) and the page
+       scrolls horizontally, failing WCAG 1.4.10. Caught by the gate's reflow
+       oracle, which axe has no rule for. */
+    flex-wrap: nowrap;
+    align-items: stretch;
+  }
+  /* Both resets, not just the aside: once the flex direction is column, the
+     22rem basis on .cl-hero-main is read as a HEIGHT and reserves dead space
+     under the title at every width below 640px. */
+  .cl-hero-main {
+    flex-basis: auto;
+    min-width: 0;
+    width: 100%;
+  }
+  .cl-hero-why {
+    flex-basis: auto;
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+/* ---------- tabs ---------- */
+
+.tabs {
+  margin: 1.5rem 0 1rem;
+}
+.tab-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.tab-btn {
+  padding: 0.55rem 0.9rem;
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius);
+  background-color: var(--surface);
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 44px;
+}
+.tab-btn:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+.tab-btn[aria-selected='true'] {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* ---------- panels and cards ---------- */
+
+.panel {
+  padding-top: 0.5rem;
+}
+.panel:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background-color: var(--surface);
+  padding: clamp(0.9rem, 2vw, 1.3rem);
+  margin: 0 0 1rem;
+}
+
+.card > :last-child {
+  margin-bottom: 0;
+}
+
+.lede {
+  color: var(--text-dim);
+  max-width: 72ch;
+}
+
+.note {
+  border-left: 3px solid var(--accent);
+  padding: 0.1rem 0 0.1rem 0.8rem;
+  margin: 0.9rem 0;
+  color: var(--text-dim);
+  font-size: 0.93rem;
+}
+
+.scope-note {
+  border: 1px dashed var(--border-control);
+  border-radius: var(--radius);
+  padding: 0.7rem 0.9rem;
+  margin: 1rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+/* ---------- controls ---------- */
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem 1.1rem;
+  align-items: flex-end;
+  margin: 0.9rem 0;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.field > label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+}
+
+.field-hint {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+input[type='text'],
+input[type='number'],
+select,
+textarea {
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--border-control);
+  border-radius: 8px;
+  background-color: var(--surface-2);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  min-height: 44px;
+  box-sizing: border-box;
+}
+
+input[type='text']:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--accent);
+}
+
+/* A styled select needs its own chevron once the native one is removed. */
+select {
+  appearance: none;
+  padding-right: 2rem;
+  background-image: linear-gradient(45deg, transparent 50%, var(--text-dim) 50%),
+    linear-gradient(135deg, var(--text-dim) 50%, transparent 50%);
+  background-position:
+    calc(100% - 1.05rem) center,
+    calc(100% - 0.75rem) center;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+
+.btn {
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  background-color: var(--accent);
+  color: var(--accent-ink);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  min-height: 44px;
+}
+.btn:hover {
+  background-color: #d8c678;
+}
+.btn-secondary {
+  background-color: transparent;
+  color: var(--accent);
+  border-color: var(--border-control);
+}
+.btn-secondary:hover {
+  background-color: #241f14;
+  color: var(--text);
+  border-color: var(--accent);
+}
+.btn[disabled] {
+  cursor: not-allowed;
+  background-color: var(--surface-2);
+  border-color: var(--border-control);
+  color: var(--text-muted);
+}
+
+/* ---------- card numbers and seeds ---------- */
+
+/* Grouped, tabular figures: a column of card numbers must align digit for
+   digit or the eye cannot compare them, which is the whole exercise. */
+.pan {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.pan-lg {
+  font-size: clamp(1rem, 2.6vw, 1.5rem);
+  font-weight: 700;
+}
+.seed {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-dim);
+  word-break: break-all;
+}
+
+/* ---------- verdicts ---------- */
+
+.verdict {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  border: 1px solid var(--border-control);
+  border-left-width: 4px;
+  border-radius: var(--radius);
+  padding: 0.75rem 0.95rem;
+  margin: 1rem 0;
+  background-color: var(--surface-2);
+  font-weight: 600;
+}
+/* State is icon + text + colour, never colour alone. The icon is a real
+   character in the markup so it survives a grayscale or deuteranopic render
+   and is read out by a screen reader with the verdict text. */
+.verdict-icon {
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  font-size: 1.05rem;
+  line-height: 1.4;
+}
+.verdict-body {
+  min-width: 0;
+}
+.verdict-text {
+  display: block;
+  letter-spacing: 0.03em;
+}
+.verdict-detail {
+  display: block;
+  margin-top: 0.25rem;
+  font-weight: 400;
+  font-size: 0.9rem;
+  color: var(--text-dim);
+}
+.verdict[data-verdict='held'] {
+  border-left-color: var(--accent);
+  color: var(--accent);
+}
+.verdict[data-verdict='broken'] {
+  border-left-color: var(--alarm);
+  color: var(--alarm);
+}
+.verdict[data-verdict='rejected'] {
+  border-left-color: var(--info);
+  color: var(--info);
+}
+.verdict[data-verdict='warned'] {
+  border-left-color: var(--warn);
+  color: var(--warn);
+}
+.verdict[data-verdict='stale'] {
+  border-left-color: var(--border-control);
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+/* ---------- tables ---------- */
+
+.table-wrap {
+  /* Scrollable regions need to be reachable and named; a mouse-only scroll
+     container is a keyboard trap for the content inside it. */
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin: 1rem 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+caption {
+  text-align: left;
+  padding: 0.6rem 0.8rem;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  border-bottom: 1px solid var(--border);
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.45rem 0.8rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+thead th {
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+tbody tr:last-child :is(th, td) {
+  border-bottom: none;
+}
+
+td.num {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- the interval figure (exhibit 2) ---------- */
+
+.spacebar {
+  position: relative;
+  height: 2.6rem;
+  border: 1px solid var(--border-control);
+  border-radius: 6px;
+  background-color: var(--surface-2);
+  overflow: hidden;
+  margin: 0.8rem 0 0.4rem;
+}
+/* One neighbouring interval. Equal widths are an honest rendering: consecutive
+   intervals differ by at most one seed in eighteen billion. */
+.spacebar-cell {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  border-right: 1px solid var(--border-control);
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  overflow: hidden;
+}
+.spacebar-cell:last-of-type {
+  border-right: none;
+}
+.spacebar-cell.is-own {
+  background-color: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 700;
+}
+.spacebar-marker {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  background-color: var(--text);
+}
+
+/* ---------- progress ---------- */
+
+.progress {
+  height: 0.5rem;
+  border: 1px solid var(--border-control);
+  border-radius: 999px;
+  background-color: var(--surface-2);
+  overflow: hidden;
+  margin: 0.6rem 0;
+}
+.progress-fill {
+  height: 100%;
+  background-color: var(--accent);
+  width: 0;
+}
+
+.stat-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem 2rem;
+  margin: 0.8rem 0;
+}
+.stat {
+  min-width: 0;
+  max-width: 100%;
+}
+.stat-label {
+  display: block;
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.stat-value {
+  display: block;
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text);
+  /* A 32-hex-character R has no break opportunity of its own and overflows a
+     phone-width column by a few pixels — enough to fail WCAG 1.4.10. */
+  overflow-wrap: anywhere;
+}
+.stat-sub {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* ---------- disclosures ---------- */
+
+details {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.8rem;
+  margin: 0.9rem 0;
+  background-color: var(--surface);
+}
+summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--accent);
+  min-height: 24px;
+}
+details[open] > summary {
+  margin-bottom: 0.6rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.4rem;
+}
+
+/* ---------- lists ---------- */
+
+#app ul.plain {
+  list-style: none;
+  padding-left: 0;
+  margin: 0.6rem 0;
+}
+#app ul.plain > li {
+  padding-left: 1.1rem;
+  position: relative;
+  margin-bottom: 0.35rem;
+  color: var(--text-dim);
+}
+#app ul.plain > li::before {
+  content: '·';
+  position: absolute;
+  left: 0.25rem;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* ---------- the candidate list (exhibit 4) ---------- */
+
+/*
+ * Before the learner asks, every row is painted identically. There is no
+ * class, no data attribute, no ordering and no colour that separates the true
+ * card from the ninety-nine others — marking it would answer the question the
+ * exhibit asks. The reveal adds .is-true, and only then.
+ */
+.candidates td,
+.candidates th {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+.candidates tr.is-true {
+  background-color: #2b2412;
+}
+.candidates tr.is-true td:first-child::before {
+  content: '>> ';
+  color: var(--accent);
+  font-weight: 700;
+}
+.candidates tr.is-true td {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* ---------- footer ---------- */
+
+.scripture-footer {
+  margin-top: 2.5rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.86rem;
+}
+.scripture-footer p {
+  margin: 0 0 0.5rem;
+}
+.footer-links a {
+  color: var(--accent);
+}
+
+/* ---------- motion ---------- */
+
+/*
+ * The only motion in this lab is the progress fill and the seed marker moving
+ * when a value changes — both tied to an action, neither decorative. Under a
+ * reduced-motion preference the transition is removed and the element is left
+ * at its END state, which is the state that carries the information.
+ */
+.spacebar-marker,
+.progress-fill {
+  transition: left 0.18s ease, width 0.18s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spacebar-marker,
+  .progress-fill {
+    transition: none;
+  }
+}
+
+/* ---------- narrow viewports ---------- */
+
+@media (max-width: 640px) {
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .field,
+  .btn {
+    width: 100%;
+  }
+  .stat-row {
+    gap: 0.8rem 1.2rem;
+  }
+}
