@@ -202,8 +202,9 @@ function knownPlaintextPanel(): HTMLElement {
         'known-plaintext',
       ),
       note([
-        'This is not a flaw in the implementation. Jaeger, Ristenpart and Tang prove it is ',
-        'unavoidable for any scheme of this kind: their section 4 shows an unbounded attacker ',
+        'This is not a flaw in the implementation. Jaeger, Ristenpart and Tang (IACR ePrint ',
+        '2016/174) prove it is unavoidable for any scheme of this kind: their section 4, ',
+        '\u201cImpossibility of KMA Security with Low-entropy Keys\u201d, shows an unbounded attacker ',
         'holding a limited number of encryptions of known plaintexts can always recover messages. ',
         'If you encrypt a vault of cards under one password and the attacker learns a single one ',
         'of them by other means, the rest go with it.',
