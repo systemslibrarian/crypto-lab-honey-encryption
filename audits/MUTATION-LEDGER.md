@@ -4,7 +4,7 @@ Written by `scripts/mutate.mjs`. **Every observed value here is produced by the
 run, never typed.** Re-running the script rewrites this file; a hand-edit is a
 second, unenforceable copy of an answer the script already holds.
 
-Run: 2026-11-15 23:54 UTC
+Run: 2026-11-16 00:42 UTC
 Mutations: 9 · killed: 9 · survived: 0 · other: 0
 
 A kill requires all four rules of template §4.1c, and the script enforces each:
@@ -42,7 +42,7 @@ Patch — `src/he/dte.ts`, anchor must occur exactly once:
 
 Owning test: dte.test.ts — the documented interval, its edges, and decode(encode(i))
 
-Observed in this run: source `1fc0b0ab2746` → `8e29e83727f1`, bundle `2cb462c13cd8` → `f411fc3b9386`.
+Observed in this run: source `1fc0b0ab2746` → `8e29e83727f1`, bundle `d648048add21` → `9888892e0d74`.
 
 ### (2) interval bounds use floor instead of ceiling
 
@@ -59,7 +59,7 @@ Patch — `src/he/dte.ts`, anchor must occur exactly once:
 
 Owning test: dte.test.ts — the documented bounds for account 123456789 change
 
-Observed in this run: source `1fc0b0ab2746` → `b0c9204726e5`, bundle `2cb462c13cd8` → `d6b1e23be823`.
+Observed in this run: source `1fc0b0ab2746` → `b0c9204726e5`, bundle `d648048add21` → `f9ebbe9bfb43`.
 
 ### (3) encode always returns the lower bound
 
@@ -76,7 +76,7 @@ Patch — `src/he/dte.ts`, anchor must occur exactly once:
 
 Owning test: dte.test.ts — "draws seeds that vary across the interval, not just its lower bound"
 
-Observed in this run: source `1fc0b0ab2746` → `1e3c1989091b`, bundle `2cb462c13cd8` → `b3fc389e2b57`.
+Observed in this run: source `1fc0b0ab2746` → `1e3c1989091b`, bundle `d648048add21` → `d92740028342`.
 
 ### (4) the Luhn digit doubles the wrong positions
 
@@ -93,7 +93,7 @@ Patch — `src/he/luhn.ts`, anchor must occur exactly once:
 
 Owning test: luhn.test.ts — the classic 79927398713 example and the reversal re-derivation
 
-Observed in this run: source `ca58b15ed75f` → `3567ec0a50cb`, bundle `2cb462c13cd8` → `b72674dc7c02`.
+Observed in this run: source `ca58b15ed75f` → `3567ec0a50cb`, bundle `d648048add21` → `ee1e34588940`.
 
 ### (5) H reads the pad little-endian
 
@@ -114,7 +114,7 @@ Patch — `src/he/he.ts`, anchor must occur exactly once:
 
 Owning test: he.test.ts — the published fixed vector C
 
-Observed in this run: source `f2ae45f7484e` → `76b2000611ba`, bundle `2cb462c13cd8` → `6902882b0475`.
+Observed in this run: source `f2ae45f7484e` → `76b2000611ba`, bundle `d648048add21` → `cb914eab3999`.
 
 ### (6) PBKDF2 called with 1 iteration instead of 100
 
@@ -131,7 +131,7 @@ Patch — `src/he/he.ts`, anchor must occur exactly once:
 
 Owning test: he.test.ts — vector C and the stated iteration count
 
-Observed in this run: source `f2ae45f7484e` → `6f3d739a3d81`, bundle `2cb462c13cd8` → `3536982fa1aa`.
+Observed in this run: source `f2ae45f7484e` → `6f3d739a3d81`, bundle `d648048add21` → `71a1b52aec30`.
 
 ### (7) attacker success decided by "returned a card" instead of "returned the true password"
 
@@ -148,7 +148,7 @@ Patch — `src/he/attacks.ts`, anchor must occur exactly once:
 
 Owning test: attacks.test.ts — "separates \"produced a valid card\" from \"recovered the password\""
 
-Observed in this run: source `b693adc91a1e` → `2f9126cd99a0`, bundle `2cb462c13cd8` → `e994a7aa698b`.
+Observed in this run: source `b693adc91a1e` → `2f9126cd99a0`, bundle `d648048add21` → `692d068f4759`.
 
 ### (8) the reveal marker is present in the DOM before the learner asks
 
@@ -165,7 +165,7 @@ Patch — `src/ui/ex4-search.ts`, anchor must occur exactly once:
 
 Owning test: claims.spec.ts — "the true card appears among the candidates exactly once, and only after the reveal"
 
-Observed in this run: source `58dfdeb748ce` → `a9f72dc291e8`, bundle `2cb462c13cd8` → `09fbf701708c`.
+Observed in this run: source `58dfdeb748ce` → `a9f72dc291e8`, bundle `d648048add21` → `f4d4067b94a0`.
 
 ### (9) an AES-GCM rejection is shown as a garbage decryption
 
@@ -186,5 +186,5 @@ Patch — `src/he/pbe.ts`, anchor must occur exactly once:
 
 Owning test: pbe.test.ts — "AES-GCM: every wrong password is rejected, not decrypted"
 
-Observed in this run: source `f2acd1ea2243` → `a86cadf22055`, bundle `2cb462c13cd8` → `97c6695a4f29`.
+Observed in this run: source `f2acd1ea2243` → `a86cadf22055`, bundle `d648048add21` → `31e84aa94fd5`.
 
