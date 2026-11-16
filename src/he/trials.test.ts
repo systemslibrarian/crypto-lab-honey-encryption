@@ -31,15 +31,26 @@ import {
 const slow = process.env.SLOW === '1' ? it : it.skip;
 
 /**
- * Measured on an Apple M5, single-threaded, on a heavily loaded machine
- * (load average ~35, five other build sessions running):
- *   balls and bins, 100,000 runs      ~25 s
- *   3,000 card trials                 ~204 s
- *   20,000 pile-up trials             ~1,233 s
- * Budgets are roughly 3x those, which is generous without being the six-hour
- * default that turns a hung test into a job-limit timeout nobody reads.
+ * Budgets, from SINGLE-THREADED runs of these tests on an Apple M5 under heavy
+ * load (load average ~35, several other build sessions running):
+ *
+ *   balls and bins, 100,000 runs   over 120 s, and it varies: it cleared 120 s
+ *                                  on one run and exceeded it on the next
+ *   3,000 card trials              ~204 s
+ *   20,000 pile-up trials          ~1,233 s
+ *
+ * Do NOT size these from scripts/measure-rates.mjs. That script shards the
+ * same functions across ten worker threads and reports balls-and-bins at ~25 s
+ * — a figure that is about the shard, not about this test. Sizing the first
+ * budget from it put it exactly on vitest's own 120 s default, so the
+ * per-test timeout raised nothing and the test failed on a slower run while
+ * printing a perfectly good result.
+ *
+ * Budgets are several times the measurement, which is generous without being
+ * the six-hour default that turns a hung test into a job-limit timeout nobody
+ * reads.
  */
-const BUDGET = { ballsAndBins: 120_000, cards: 600_000, pileUp: 3_600_000 };
+const BUDGET = { ballsAndBins: 600_000, cards: 900_000, pileUp: 3_600_000 };
 
 describe('trial accumulators', () => {
   it('merges card totals so a run can be sharded', () => {
