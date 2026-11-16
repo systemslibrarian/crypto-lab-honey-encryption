@@ -16,9 +16,30 @@ import {
  * The slow rate measurements are tagged and skipped by default. Run them with
  *   npm run test:slow
  * The figures they bracket are in README.md under "Build & Verify", measured
- * with scripts/measure-rates.mjs, which shards the same functions.
+ * with scripts/measure-rates.mjs, which shards the same functions across
+ * cores; these run single-threaded, which is why they need their own budgets.
+ *
+ * EACH CARRIES ITS OWN MEASURED DURATION. Vitest 4 measures elapsed time and
+ * fails a test afterwards, where vitest 2 raced a timer a non-yielding body
+ * never let run — so a synchronous million-PBKDF2 loop that used to pass a
+ * 120s budget now reports "timed out in 120000ms" after 1,233,466ms. The tell
+ * is a failure quoting a duration far above the timeout it supposedly
+ * exceeded. The fix is a per-test budget carrying the measurement, never
+ * shrinking what the test does: these ARE the acceptance measurements and
+ * their trial counts are the point.
  */
 const slow = process.env.SLOW === '1' ? it : it.skip;
+
+/**
+ * Measured on an Apple M5, single-threaded, on a heavily loaded machine
+ * (load average ~35, five other build sessions running):
+ *   balls and bins, 100,000 runs      ~25 s
+ *   3,000 card trials                 ~204 s
+ *   20,000 pile-up trials             ~1,233 s
+ * Budgets are roughly 3x those, which is generous without being the six-hour
+ * default that turns a hung test into a job-limit timeout nobody reads.
+ */
+const BUDGET = { ballsAndBins: 120_000, cards: 600_000, pileUp: 3_600_000 };
 
 describe('trial accumulators', () => {
   it('merges card totals so a run can be sharded', () => {
@@ -84,7 +105,9 @@ describe('balls and bins (no cryptography)', () => {
 
   // FACTS 7, first bullet: the brief author's rerun over 100,000 runs gave
   // mean 2.138, min 1, max 5, sd 0.373.
-  slow('reproduces the 100,000-run figure: mean 2.13-2.15, min 1, max 5', () => {
+  slow(
+    'reproduces the 100,000-run figure: mean 2.13-2.15, min 1, max 5',
+    () => {
     const r = runBallsAndBins(100_000, 100, 1000);
     const { mean, sd } = meanAndSd(r.runs, r.sum, r.sumSquares);
     console.log(`balls-and-bins: runs=${r.runs} mean=${mean.toFixed(3)} sd=${sd.toFixed(3)} min=${r.min} max=${r.max}`);
@@ -94,7 +117,9 @@ describe('balls and bins (no cryptography)', () => {
     expect(r.max).toBe(5);
     expect(sd).toBeGreaterThan(0.35);
     expect(sd).toBeLessThan(0.40);
-  });
+    },
+    BUDGET.ballsAndBins,
+  );
 });
 
 describe('card trials', () => {
@@ -134,7 +159,9 @@ describe('card trials', () => {
     // w = 1/100, and the attacker achieves w.
     expect(pct).toBeGreaterThan(0.4);
     expect(pct).toBeLessThan(1.8);
-  });
+    },
+    BUDGET.cards,
+  );
 });
 
 describe('pile-up trials', () => {
@@ -160,5 +187,7 @@ describe('pile-up trials', () => {
     expect(pct).toBeLessThan(2.5);
     expect(mean).toBeGreaterThan(2.10);
     expect(mean).toBeLessThan(2.18);
-  });
+    },
+    BUDGET.pileUp,
+  );
 });
