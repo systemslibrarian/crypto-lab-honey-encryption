@@ -267,19 +267,72 @@ body {
 
 /* ---------- controls ---------- */
 
+/*
+ * A control row whose LABEL, CONTROL and HINT lines line up across every item.
+ *
+ * The obvious `display:flex; align-items:flex-end` does not: a field carrying a
+ * hint is taller than one without, so bottom-aligning them puts the hintless
+ * control (and every bare button) a line lower than the inputs beside it. The
+ * rows have to be shared, not guessed at, so the row track lives on the
+ * CONTAINER and each field adopts it with `grid-template-rows: subgrid`.
+ * Buttons sit in row 2, the control row, so they align with the inputs rather
+ * than with the hints underneath them.
+ */
 .controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.9rem 1.1rem;
-  align-items: flex-end;
-  margin: 0.9rem 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), max-content));
+  /* Explicit, because `subgrid` adopts a track the parent actually declares;
+     with only implicit rows the field spans them and its control stretches
+     across the control and hint lines together. */
+  grid-template-rows: auto auto auto;
+  /* The ROW gap must match the field's own, or the shared rows and the rows a
+     bare button is placed into do not coincide and the button sits a few
+     pixels below the inputs. Column gap is free to differ. */
+  gap: 0.3rem 1.1rem;
+  align-items: start;
+  margin: 0.9rem 0 1.4rem;
 }
 
 .field {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-row: span 3;
+  grid-template-rows: subgrid;
   gap: 0.3rem;
   min-width: 0;
+}
+
+/* Each child takes exactly one of the three shared rows. */
+.field > label {
+  grid-row: 1;
+}
+.field > :is(input, select, textarea) {
+  grid-row: 2;
+  align-self: start;
+}
+.field > .field-hint {
+  grid-row: 3;
+}
+
+/* A bare button in a control row belongs on the control line. */
+.controls > .btn {
+  grid-row: 2;
+  align-self: start;
+}
+
+/*
+ * Subgrid fallback. Without it a field collapses to a single row and the three
+ * lines overlap, which is worse than the misalignment this replaces.
+ */
+@supports not (grid-template-rows: subgrid) {
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+  }
 }
 
 .field > label {
@@ -307,6 +360,12 @@ textarea {
   font-size: 0.95rem;
   min-height: 44px;
   box-sizing: border-box;
+  /* A <select> is as wide as its widest OPTION by default, and this lab has
+     options like "The 6 passwords of the published vector". Left alone that is
+     401px inside a 348px column at phone width — a horizontal scrollbar, and
+     WCAG 1.4.10. */
+  max-width: 100%;
+  min-width: 0;
 }
 
 input[type='text']:focus,
@@ -693,9 +752,25 @@ details[open] > summary {
 /* ---------- narrow viewports ---------- */
 
 @media (max-width: 640px) {
+  /*
+   * One control per line, so subgrid buys nothing: there is no second column
+   * to line a label up with. It is also actively wrong here — the fields are
+   * placed at `grid-row: span 3` and the buttons at row 2, and in a
+   * single-column grid that placement pushes each item into an IMPLICIT COLUMN
+   * to the right instead of onto its own line, which is a horizontal
+   * scrollbar. Flex is the right tool at this width.
+   */
   .controls {
+    display: flex;
     flex-direction: column;
     align-items: stretch;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+  }
+  .controls > .btn {
+    grid-row: auto;
   }
   .field,
   .btn {

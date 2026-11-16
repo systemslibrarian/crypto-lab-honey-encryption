@@ -58,7 +58,7 @@ export function mountOrdinary(root: HTMLElement): void {
   ]);
   const encryptBtn = el('button', { class: 'btn', type: 'button', id: 'ord-encrypt' }, ['Encrypt']);
   const attackBtn = el('button', { class: 'btn btn-secondary', type: 'button', id: 'ord-attack' }, [
-    `Run the dictionary attack (${DICT_SIZE} candidates)`,
+    'Run the dictionary attack',
   ]);
   const out = el('div', { id: 'ord-out' });
 
