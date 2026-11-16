@@ -232,7 +232,7 @@ function renderAttack(
   const detail =
     result.guess === null
       ? `The true password was not among the ${dictSize} candidates, so the search ended with nothing. It would have recognised the password had the list contained it.`
-      : `The attacker named "${result.guess}" after ${result.tried} ${result.tried === 1 ? 'try' : 'tries'}, on the basis of a ${result.basis}. Scored against the password this page kept back: ${score.succeeded ? 'correct' : 'wrong'}.`;
+      : `The attacker named "${result.guess}" after ${result.tried} ${result.tried === 1 ? 'try' : 'tries'}, on the basis of ${result.basis === 'tag verified' ? 'a verified tag' : 'an all-digit plaintext'}. Scored against the password this page kept back: ${score.succeeded ? 'correct' : 'wrong'}.`;
 
   fill(out, [
     el('div', { class: 'stat-row' }, [
