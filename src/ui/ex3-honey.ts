@@ -211,10 +211,8 @@ export function mountHoney(root: HTMLElement): void {
       el('h2', {}, ['Honey encryption: the wrong password gives you a card too']),
       el('p', { class: 'lede' }, [
         'Same card, same weak password, but now the plaintext is encoded into a seed before it is ',
-        'encrypted — and the cipher is a one-time pad from a hash of the password. Decrypt with the ',
-        'password you chose and you get your card back. Decrypt with anything else and you get a ',
-        'different card, which also passes its check digit, and which the output gives you no way ',
-        'to dismiss.',
+        'masked with a value derived from the password and salt. Decrypt with the ',
+        'password you chose and you get your card back. Every other password also gives a card with a valid check digit. Two passwords can decode to the same card.',
       ]),
       el('div', { class: 'controls' }, [
         field('he-account', 'Account digits (9)', accountInput, 'Do not type a real card number.'),

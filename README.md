@@ -16,8 +16,8 @@ where it very much can, and the three cases where the protection fails.
 Brute force needs a way to recognise the right answer. Ordinary password-based encryption
 hands an attacker one for free: decrypt a 16-digit card number stored as ASCII under the
 wrong password and you get sixteen arbitrary bytes, which are all digits with probability
-`(10/256)^16` — about `2.9e-23`, below `2^-74` — so the first all-digit result is the
-plaintext. With an authenticated mode it is easier still: the tag fails and the wrong
+`(10/256)^16` — about `2.9e-23`, below `2^-74` — so an all-digit result is strong evidence for the
+plaintext, with a small chance of a false positive. With an authenticated mode it is easier still: the tag fails and the wrong
 password is rejected outright.
 
 Honey encryption removes that test. The message is first **encoded** into a seed drawn from

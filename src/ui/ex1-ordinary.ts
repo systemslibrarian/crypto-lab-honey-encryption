@@ -67,8 +67,11 @@ export function mountOrdinary(root: HTMLElement): void {
     return `${accountInput.value}|${passwordInput.value}|${modeSelect.value}`;
   }
 
+  let generation = 0;
   function retireIfChanged(): void {
-    if (state.ct && state.madeFrom !== currentInputs()) {
+    if (state.madeFrom !== '' && state.madeFrom !== currentInputs()) {
+      generation++;
+      state.madeFrom = '';
       state.ct = null;
       attackBtn.disabled = true;
       fill(out, [
@@ -88,6 +91,8 @@ export function mountOrdinary(root: HTMLElement): void {
   modeSelect.addEventListener('change', retireIfChanged);
 
   encryptBtn.addEventListener('click', async () => {
+    const request = ++generation;
+    state.madeFrom = currentInputs();
     const parsed = parseAccount(accountInput.value);
     if (!parsed.ok) {
       state.ct = null;
@@ -99,17 +104,23 @@ export function mountOrdinary(root: HTMLElement): void {
     state.password = passwordInput.value;
     state.mode = modeSelect.value as PbeMode;
     const pan = cardFromAccount(state.account);
-    state.ct = await pbeEncrypt(state.password, pan, state.mode);
-    state.madeFrom = currentInputs();
+    state.ct = null;
+    attackBtn.disabled = true;
+    out.textContent = 'Encrypting…';
+    const ct = await pbeEncrypt(state.password, pan, state.mode);
+    if (generation !== request) return;
+    state.ct = ct;
     attackBtn.disabled = false;
     renderCiphertext(out, state, pan);
   });
 
   attackBtn.addEventListener('click', async () => {
     if (!state.ct) return;
+    const request = generation;
     const dictionary = dictionaryOf(DICT_SIZE);
     // The attacker receives the ciphertext and the candidate list. Nothing else.
     const result = await attackPbe(state.ct, dictionary);
+    if (generation !== request) return;
     // Scored afterwards, against the password this frame kept back.
     const score = scoreAttack(result.guess, state.password);
     renderAttack(out, state, result, score, dictionary.length);
@@ -149,11 +160,11 @@ export function mountOrdinary(root: HTMLElement): void {
           el('code', {}, ['(10/256)^16']),
           ' = ',
           el('code', {}, [allDigitsProbability().toExponential(2)]),
-          ', which is below ',
+          ', approximately ',
           el('code', {}, [`2^${allDigitsLog2().toFixed(1)}`]),
-          '. Over the forty candidates above, the expected number of false positives is ',
+          '. Across forty wrong candidates the expected number of false positives is ',
           el('code', {}, [(40 * allDigitsProbability()).toExponential(2)]),
-          '. So the first all-digit result is the plaintext, and the search stops.',
+          '. An all-digit result is strong evidence for the password. The lab checks that guess against the password chosen for this run.',
         ]),
       ]),
       scopeNote([
@@ -225,7 +236,9 @@ function renderAttack(
   const headline =
     result.guess === null
       ? 'NOT FOUND'
-      : state.mode === 'aes-gcm'
+      : !score.succeeded
+        ? 'FALSE POSITIVE — THE GUESS WAS WRONG'
+        : state.mode === 'aes-gcm'
         ? 'PASSWORD RECOVERED — THE TAG SAID SO'
         : 'PASSWORD RECOVERED — THE PLAINTEXT SAID SO';
 
@@ -241,10 +254,10 @@ function renderAttack(
       stat('Card encrypted', displayCard(state.account)),
     ]),
     verdict(
-      result.guess === null ? 'warned' : 'broken',
+      score.succeeded ? 'broken' : 'warned',
       headline,
       detail,
-      result.guess === null ? 'pbe-not-found' : 'pbe-recovered',
+      result.guess === null ? 'pbe-not-found' : score.succeeded ? 'pbe-recovered' : 'pbe-false-positive',
     ),
     tableWrap('Dictionary attack against ordinary encryption', table),
   ]);
